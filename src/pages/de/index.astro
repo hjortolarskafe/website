@@ -1,0 +1,120 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import hoursData from '../../data/openingHours.json';
+
+type MenuItem = {
+  isActive: boolean;
+  title: string;
+  description?: string;
+  dietary?: string[];
+  // Add other fields as needed
+};
+
+const menuModules = import.meta.glob('../../data/menu/*.json', { eager: true });
+const allMenuItems = Object.values(menuModules) as MenuItem[];
+
+const activeMenu = allMenuItems.filter(item => item.isActive === true);
+---
+
+<BaseLayout title="Hjort Olars Café" lang="de">
+    <section id="about">
+      <h2>Om oss</h2>
+      <p>Välkommen till Hjort Olars. Här kan du skriva en kort text om kaféet...</p>
+    </section>
+
+    <section id="menu">
+      <h2>Dagens Meny</h2>
+      <div class="menu-grid">
+        {activeMenu.length === 0 ? (
+          <p>Menyn uppdateras just nu...</p>
+        ) : (
+          activeMenu.map((item) => (
+            <div class="menu-item">
+              <div class="menu-header">
+                <h3>{item.title}</h3>
+                <div class="dietary-flags">
+                  {item.dietary && item.dietary.map((flag) => (
+                    <span class={`flag flag-${flag.toLowerCase()}`}>{flag}</span>
+                  ))}
+                </div>
+              </div>
+              <p>{item.description}</p>
+            </div>
+          ))
+        )}
+      </div>
+    </section>
+
+    <section id="opening-hours">
+      <h2>Opening Hours</h2>
+      <ul class="hours-list">
+        <li><span>Monday - Friday</span> <span>{hoursData.monFri}</span></li>
+        <li><span>Saturday</span> <span>{hoursData.saturday}</span></li>
+        <li><span>Sunday</span> <span>{hoursData.sunday}</span></li>
+      </ul>
+    </section>
+
+    <section id="socials">
+      <h2>Följ oss</h2>
+      <ul>
+        <li><a href="#">Instagram</a></li>
+        <li><a href="#">Facebook</a></li>
+      </ul>
+    </section>
+
+    <section id="gallery">
+      <h2>Bilder</h2>
+      <p>Se vad som händer på kaféet just nu!</p>
+      
+      <div class="instagram-grid">
+        <div class="ig-placeholder">
+          <p>Instagram inbäddning 1</p>
+        </div>
+        <div class="ig-placeholder">
+          <p>Instagram inbäddning 2</p>
+        </div>
+        <div class="ig-placeholder">
+          <p>Instagram inbäddning 3</p>
+        </div>
+      </div>
+    </section>
+
+	<section id="location">
+      <h2>Hitta hit</h2>
+      <p>Hagvägen 60, 785 44 Dala-Floda</p>
+      
+      <iframe 
+        src="https://maps.google.com/maps?q=Hagv%C3%A4gen%2060,%20785%2044%20Dala-Floda,%20Sweden&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+        width="100%" 
+        height="400" 
+        style="border:0; border-radius: 8px; margin-top: 1rem;" 
+        allowfullscreen="" 
+        loading="lazy">
+      </iframe>
+    </section>
+
+	<section id="contact">
+		<h2>Kontakt</h2>
+		<p>Email: hej@hjortolars.se</p>
+		<p>Telefon: 070-123 45 67</p>
+
+		<form action="https://formspree.io/f/YOUR_FORM_ID_HERE" method="POST" class="contact-form">
+		<div class="form-group">
+			<label for="name">Namn</label>
+			<input type="text" id="name" name="name" required />
+		</div>
+
+		<div class="form-group">
+			<label for="email">E-post</label>
+			<input type="email" id="email" name="email" required />
+		</div>
+
+		<div class="form-group">
+			<label for="message">Meddelande</label>
+			<textarea id="message" name="message" rows="5" required></textarea>
+		</div>
+
+		<button type="submit">Skicka meddelande</button>
+		</form>
+	</section>
+</BaseLayout>

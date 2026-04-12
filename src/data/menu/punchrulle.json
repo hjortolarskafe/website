@@ -1,0 +1,9 @@
+{
+  "title": "Punchrulle",
+  "description": "Den ikoniska svenska dammsugaren, härlig hit av arrack i marsipan och choklad-täcke.",
+  "isActive": true,
+  "dietary": [
+    "Vegetarisk",
+    "Nötfri"
+  ]
+}

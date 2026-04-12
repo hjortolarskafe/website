@@ -1,0 +1,9 @@
+{
+  "title": "Keylime Pie",
+  "description": "En fräsch klassiker från Florida Keys på lime och grädde.",
+  "isActive": true,
+  "dietary": [
+    "Nötfri",
+    "Glutenfri"
+  ]
+}

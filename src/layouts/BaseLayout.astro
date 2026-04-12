@@ -1,0 +1,461 @@
+---
+const { title, lang } = Astro.props as {
+  title: string;
+  lang: "sv" | "en" | "de";
+};
+
+// A simple dictionary for our sticky footer links
+const navTranslations = {
+  sv: {
+    about: "Om oss",
+    menu: "Dagens Meny",
+    openingHours: "Öppettider",
+    gallery: "Bilder",
+    location: "Hitta hit",
+    contact: "Kontakt",
+  },
+  en: {
+    about: "About us",
+    menu: "Today's Menu",
+    openingHours: "Opening Hours",
+    gallery: "Pictures",
+    location: "Location",
+    contact: "Contact",
+  },
+  de: {
+    about: "Über uns",
+    menu: "Heutiges Menü",
+    openingHours: "Öffnungszeiten",
+    gallery: "Galerie",
+    location: "Anfahrt",
+    contact: "Kontakt",
+  },
+} as const;
+
+// This grabs the right language, and defaults to Swedish if something goes wrong
+const t =
+  navTranslations[lang as keyof typeof navTranslations] ||
+  navTranslations["sv"];
+---
+
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <div class="parallax-container">
+      <div class="parallax-layer wallpaper-layer"></div>
+    </div>
+
+    <header>
+      <h1>Hjort Olârs</h1>
+      <nav class="lang-switcher">
+        <a href="/sv/" class={lang === "sv" ? "active" : ""}>Svenska</a>
+        <a href="/en/" class={lang === "en" ? "active" : ""}>English</a>
+        <a href="/de/" class={lang === "de" ? "active" : ""}>Deutsch</a>
+      </nav>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <nav class="sticky-footer">
+      <a href="#about">{t.about}</a>
+      <a href="#menu">{t.menu}</a>
+      <a href="#opening-hours">{t.openingHours}</a>
+      <a href="#gallery">{t.gallery}</a>
+      <a href="#location">{t.location}</a>
+      <a href="#contact">{t.contact}</a>
+    </nav>
+  </body>
+</html>
+
+<style is:global>
+  /* 1. Define some cozy café colors */
+  :root {
+    --bg-color: #fafaf7; /* Warm off-white */
+    --text-color: #421909; /* Dark espresso brown for softer contrast */
+    --accent-color: #ffffff; /* Muted forest green */
+    --link-color: #a67b5b; /* Warm caramel/wood tone */
+    --red-color: #811515; /* Falu-röd */
+    --blue-color: #081d4d; /* Dala-blå */
+    --black: #000000; /* Black for text and accents */
+    --white: #ffffff; /* White for backgrounds and accents */
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* 2. Basic Reset and Typography */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+  }
+
+  /* 3. Layout constraints to make it readable */
+  main {
+    max-width: 800px;
+    margin: 0 auto; /* Centers the content on the screen */
+    padding: 2rem;
+  }
+
+  /* 4. Styling the Header & Navigation */
+  header {
+    text-align: center;
+    padding: 3rem 1rem 2rem;
+  }
+
+  header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+  }
+
+  /* --- The Floating Language Switcher --- */
+  .lang-switcher {
+    position: absolute; /* Locks it to the screen */
+    top: 2rem;
+    right: 2rem;
+    z-index: 1000; /* Ensures it stays on top of the parallax and text */
+    display: flex;
+    gap: 1rem;
+  }
+
+  .lang-switcher a {
+    background-color: rgba(255, 255, 255, 0.25); /* Semi-transparent white */
+    color: var(--black);
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px; /* Gives them a rounded, cloud-like pill shape */
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow to make them float */
+    transition:
+      transform 0.2s ease,
+      background-color 0.2s ease;
+  }
+
+  .lang-switcher a:hover {
+    transform: translateY(
+      -3px
+    ); /* Makes them "float" up slightly when hovered */
+    background-color: rgba(255, 255, 255, 0.75); /* Semi-transparent white */
+  }
+
+  .lang-switcher a.active {
+    background-color: rgba(255, 255, 255, 0.25); /* Semi-transparent white */
+    color: var(--black);
+  }
+
+  /* 5. Styling the Sections */
+  section {
+    margin-bottom: 4rem; /* Adds nice breathing room between sections */
+    padding-top: 1rem;
+  }
+
+  h2 {
+    color: var(--accent-color);
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #ebebe3;
+    padding-bottom: 0.5rem;
+  }
+
+  p {
+    margin-bottom: 1rem;
+  }
+
+  /* 6. Links and Lists */
+  a {
+    color: var(--link-color);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  ul {
+    list-style-type: none; /* Removes default bullet points */
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  /* 7. Contact Form Styles */
+  .contact-form {
+    max-width: 500px;
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .contact-form label {
+    font-weight: bold;
+    color: var(--accent-color);
+  }
+
+  .contact-form input,
+  .contact-form textarea {
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1rem;
+    background-color: #fff;
+  }
+
+  .contact-form input:focus,
+  .contact-form textarea:focus {
+    outline: 2px solid var(--accent-color);
+    border-color: transparent;
+  }
+
+  .contact-form button {
+    padding: 0.8rem 1.5rem;
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .contact-form button:hover {
+    background-color: var(--text-color);
+  }
+
+  /* 8. Parallax Background System */
+  .parallax-container {
+    position: fixed; /* Locks the container to the screen */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh; /* Covers the full height of the screen */
+    z-index: -1; /* Pushes it behind all your text and images */
+    overflow: hidden;
+    background-color: #87ceeb; /* A fallback sky-blue color for the very back */
+  }
+
+  .parallax-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* 1. Make the layers 130% of the screen height so we have room to scroll up */
+    height: 130vh;
+    /* 2. Anchor the images to the top (the sky) instead of the bottom */
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-size: cover;
+    will-change: transform;
+  }
+
+  .wallpaper-layer {
+    background-image: url("/background/background.jpg"); /* Put your seamless wallpaper here! */
+  }
+
+  /* IMPORTANT: Update your body tag background */
+  body {
+    /* Find your existing 'body' rule at the top of the CSS and change 
+       background-color to transparent so we can see the parallax behind it! */
+    background-color: transparent;
+  }
+
+  /* --- Instagram Grid --- */
+  .instagram-grid {
+    display: grid;
+    /* This ensures the Instagram embeds don't get squished too small */
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-top: 1.5rem;
+    justify-items: center; /* Centers the posts if there is extra space */
+  }
+
+  /* Placeholder styles just so you can see the boxes right now */
+  .ig-placeholder {
+    width: 100%;
+    max-width: 320px;
+    height: 400px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 1px dashed var(--accent-color);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: var(--accent-color);
+  }
+
+  /* --- Sticky Bottom Navigation --- */
+  .sticky-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--red-color); /* Uses your forest green */
+    padding: 0.8rem;
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    z-index: 2000; /* Keeps it above absolutely everything */
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.15); /* Adds a shadow above it */
+  }
+
+  .sticky-footer a {
+    color: var(--bg-color); /* White text */
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+
+  .sticky-footer a:hover {
+    background-color: var(--text-color); /* Dark brown on hover */
+  }
+
+  /* --- Menu Section --- */
+  .menu-grid {
+    display: grid;
+    /* This creates as many columns as will fit, with a minimum width of 280px */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem 3rem; /* 1.5rem vertical space, 3rem horizontal space */
+    margin-top: 1.5rem;
+  }
+
+  .menu-item {
+    /* Removed the heavy background and box-shadow */
+    padding-bottom: 1rem;
+    border-bottom: 1px dotted var(--accent-color); /* A classy dotted separator line */
+  }
+
+  .menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline; /* Aligns the text to the bottom baseline */
+    margin-bottom: 0.3rem;
+    gap: 1rem;
+  }
+
+  .menu-item h3 {
+    color: var(--text-color);
+    font-size: 1.1rem;
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .menu-item p {
+    font-size: 0.9rem;
+    margin: 0;
+    opacity: 0.85; /* Softens the description text slightly */
+  }
+
+  /* --- Dietary Flags --- */
+  .dietary-flags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .flag {
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 0.2rem 0.5rem;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Specific colors for different flags */
+  .flag-vegan {
+    background-color: #4caf50;
+    color: white;
+  }
+  .flag-vegetarisk {
+    background-color: #8bc34a;
+    color: #333;
+  }
+  .flag-glutenfri {
+    background-color: #ffc107;
+    color: #333;
+  }
+  .flag-laktosfri {
+    background-color: #03a9f4;
+    color: white;
+  }
+  .flag-nötfri {
+    background-color: #9c27b0;
+    color: white;
+  }
+
+  /* --- The Clickable Pictures (Props) --- */
+  .interactive-props {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3rem;
+    margin-top: 4rem;
+    z-index: 10;
+  }
+
+  /* These are now <a> tags instead of <div>s */
+  .clickable-prop {
+    display: block; /* Required for anchor tags to have width/height */
+    text-decoration: none;
+    cursor: pointer;
+    background-color: rgba(166, 123, 91, 0.9); /* Frame placeholder */
+    color: white;
+    padding: 3rem 2rem;
+    border-radius: 8px;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 200px;
+    height: 250px; /* Makes them look like portrait picture frames */
+  }
+
+  .clickable-prop:hover {
+    transform: scale(1.05) rotate(-2deg);
+  }
+
+
+  /* We need to add padding to the bottom of the body so the 
+     footer doesn't cover up the very bottom of your contact form! */
+  body {
+    padding-bottom: 5rem;
+  }
+</style>
+
+<script>
+  document.addEventListener("scroll", () => {
+    const scrollPosition = window.scrollY;
+    const wallpaper = document.querySelector(".wallpaper-layer") as HTMLElement;
+
+    if (wallpaper) {
+      // Moves the wallpaper up slightly as you scroll down
+      wallpaper.style.transform = `translateY(-${scrollPosition * 0.15}px)`;
+    }
+  });
+</script>

@@ -1,0 +1,56 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Hjort Olars Café" lang="sv">
+  <section id="about">
+    <h2>Om oss</h2>
+    <p>Välkommen till Hjort Olârs Café.</p>
+  </section>
+
+
+  <section id="socials">
+    <h2>Följ oss</h2>
+    <ul>
+      <li><a href="#">Instagram</a></li>
+      <li><a href="#">Facebook</a></li>
+    </ul>
+  </section>
+
+
+  <section id="gallery">
+    <h2>Bilder</h2>
+    <p>Se vad som händer på kaféet just nu!</p>
+
+    <div class="instagram-grid">
+      <div class="ig-placeholder">
+        <p>Instagram inbäddning 1</p>
+      </div>
+      <div class="ig-placeholder">
+        <p>Instagram inbäddning 2</p>
+      </div>
+      <div class="ig-placeholder">
+        <p>Instagram inbäddning 3</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="interactive-props">
+    <a href="/sv/menu/" class="clickable-prop">
+      <span>Dagens Meny</span>
+    </a>
+
+    <a href="/sv/opening-hours/" class="clickable-prop">
+      <span>Öppettider</span>
+    </a>
+
+    <a href="/sv/location/" class="clickable-prop">
+      <span>Hitta hit</span>
+    </a>
+
+    <a href="/sv/contact/" class="clickable-prop">
+      <span>Kontakt</span>
+    </a>
+  </div>
+
+</BaseLayout>
