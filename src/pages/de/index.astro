@@ -1,120 +1,194 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import hoursData from '../../data/openingHours.json';
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Separator from "../../components/separator.astro";
+import hoursData from "../../data/openingHours.json";
 
-type MenuItem = {
-  isActive: boolean;
-  title: string;
-  description?: string;
-  dietary?: string[];
-  // Add other fields as needed
-};
+import { getTranslations } from "../../utils/translations";
+import homepageData from "../../content/index.json";
 
-const menuModules = import.meta.glob('../../data/menu/*.json', { eager: true });
-const allMenuItems = Object.values(menuModules) as MenuItem[];
+const lang =  "de";
+const t = getTranslations(lang);
 
-const activeMenu = allMenuItems.filter(item => item.isActive === true);
+const days = [
+  { name: t.monday, hours: hoursData.monday },
+  { name: t.tuesday, hours: hoursData.tuesday },
+  { name: t.wednesday, hours: hoursData.wednesday },
+  { name: t.thursday, hours: hoursData.thursday },
+  { name: t.friday, hours: hoursData.friday },
+  { name: t.saturday, hours: hoursData.saturday },
+  { name: t.sunday, hours: hoursData.sunday },
+];
 ---
 
-<BaseLayout title="Hjort Olars Café" lang="de">
-    <section id="about">
-      <h2>Om oss</h2>
-      <p>Välkommen till Hjort Olars. Här kan du skriva en kort text om kaféet...</p>
-    </section>
+<BaseLayout title="Hjort Olars Café" lang={lang}>
 
-    <section id="menu">
-      <h2>Dagens Meny</h2>
-      <div class="menu-grid">
-        {activeMenu.length === 0 ? (
-          <p>Menyn uppdateras just nu...</p>
-        ) : (
-          activeMenu.map((item) => (
-            <div class="menu-item">
-              <div class="menu-header">
-                <h3>{item.title}</h3>
-                <div class="dietary-flags">
-                  {item.dietary && item.dietary.map((flag) => (
-                    <span class={`flag flag-${flag.toLowerCase()}`}>{flag}</span>
-                  ))}
-                </div>
-              </div>
-              <p>{item.description}</p>
-            </div>
-          ))
-        )}
-      </div>
-    </section>
+  <div class="hero-banner"></div>
+  <header class="main-title">
+    <!-- <a href={`/${lang}/`}>
+      <h1>HJoRT ôLARS</h1>
+    </a> -->
+    <h1>HJoRT ôLARS</h1>
+  </header>
 
-    <section id="opening-hours">
-      <h2>Opening Hours</h2>
-      <ul class="hours-list">
-        <li><span>Monday - Friday</span> <span>{hoursData.monFri}</span></li>
-        <li><span>Saturday</span> <span>{hoursData.saturday}</span></li>
-        <li><span>Sunday</span> <span>{hoursData.sunday}</span></li>
-      </ul>
-    </section>
+  <Separator/>
 
-    <section id="socials">
-      <h2>Följ oss</h2>
-      <ul>
-        <li><a href="#">Instagram</a></li>
-        <li><a href="#">Facebook</a></li>
-      </ul>
-    </section>
+  <section id="about" class ="about">
+    <p>{homepageData.text_de}</p>
+  </section>
 
-    <section id="gallery">
-      <h2>Bilder</h2>
-      <p>Se vad som händer på kaféet just nu!</p>
-      
-      <div class="instagram-grid">
-        <div class="ig-placeholder">
-          <p>Instagram inbäddning 1</p>
-        </div>
-        <div class="ig-placeholder">
-          <p>Instagram inbäddning 2</p>
-        </div>
-        <div class="ig-placeholder">
-          <p>Instagram inbäddning 3</p>
-        </div>
-      </div>
-    </section>
+  <Separator variant="B"/>
 
-	<section id="location">
-      <h2>Hitta hit</h2>
-      <p>Hagvägen 60, 785 44 Dala-Floda</p>
-      
-      <iframe 
-        src="https://maps.google.com/maps?q=Hagv%C3%A4gen%2060,%20785%2044%20Dala-Floda,%20Sweden&t=&z=15&ie=UTF8&iwloc=&output=embed" 
-        width="100%" 
-        height="400" 
-        style="border:0; border-radius: 8px; margin-top: 1rem;" 
-        allowfullscreen="" 
-        loading="lazy">
-      </iframe>
-    </section>
+  <section class="opening-hours">
+    <!-- <h2><a href={`/${lang}/good-to-know/`}>{t.openingHours}</a></h2> -->
+    <h2>{t.openingHours}</h2>
 
-	<section id="contact">
-		<h2>Kontakt</h2>
-		<p>Email: hej@hjortolars.se</p>
-		<p>Telefon: 070-123 45 67</p>
+    <div class="hours-container">
+      {days.map((day) => {
+        // MAGIC CHECK: Is the Keystatic field empty? Or did they manually type "stängt"?
+        const isClosed = !day.hours || day.hours.toLowerCase() === "stängt";
 
-		<form action="https://formspree.io/f/YOUR_FORM_ID_HERE" method="POST" class="contact-form">
-		<div class="form-group">
-			<label for="name">Namn</label>
-			<input type="text" id="name" name="name" required />
-		</div>
+        return (
+          <div class="hours-row">
+            <span class="day">{day.name}</span>
+            <span class={`time-badge ${isClosed ? 'closed' : ''}`}>
+              {/* If it's closed, print "Geschlossen". Otherwise, print the Keystatic time! */}
+              {isClosed ? "Geschlossen" : day.hours}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  </section>
 
-		<div class="form-group">
-			<label for="email">E-post</label>
-			<input type="email" id="email" name="email" required />
-		</div>
+  <Separator variant="A"/>
 
-		<div class="form-group">
-			<label for="message">Meddelande</label>
-			<textarea id="message" name="message" rows="5" required></textarea>
-		</div>
+  <section id="location">
+    <!-- <h2><a href={`/${lang}/good-to-know/`}>{t.location}</a></h2> -->
+    <h2>{t.location}</h2>
 
-		<button type="submit">Skicka meddelande</button>
-		</form>
-	</section>
+    <iframe
+      src="https://maps.google.com/maps?q=Hagv%C3%A4gen%2060,%20785%2044%20Dala-Floda,%20Sweden&t=&z=15&ie=UTF8&iwloc=&output=embed"
+      width="100%"
+      height="400"
+      style="border:0; border-radius: 8px; margin-top: 1rem;"
+      allowfullscreen=""
+      loading="lazy"
+    >
+    </iframe>
+  </section>
+
 </BaseLayout>
+
+<style>
+
+  /* --- The Fading Hero Image --- */
+  .hero-banner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 500px; /* Adjust this to make the image taller or shorter! */
+    
+    background-image: url("/background/header.jpg"); 
+    background-size: cover;
+    background-position: center 55%;
+    
+    pointer-events: none;
+
+
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 35%, rgba(0,0,0,0) 100%);
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 35%, rgba(0,0,0,0) 100%);
+  }
+  
+  /* The Main Typography Title */
+  .main-title {
+    text-align: center;
+    padding: 3rem 1rem 1rem; /* Gives it breathing room below the sticky nav */
+    position: relative; /* Needed to stack it above the hero image */
+    z-index: 10; /* Ensures the title is above the hero image */
+  }
+
+  .main-title a {
+    text-decoration: none; /* Removes the ugly default underline */
+    color: inherit; /* Tells the link to just use the color from the h1 */
+    display: inline-block; /* Makes the clickable area wrap the text perfectly */
+    transition: transform 0.2s ease; /* Adds a smooth transition for the hover effect */
+  }
+
+  .main-title a:hover {
+    transform: scale(1.02); /* A very subtle, premium "grow" effect when hovered */
+  }
+
+  .main-title h1 {
+    font-family: 'Chelsea Market';
+    font-size: 5rem; /* Made it bigger so the typography really shines! */
+    letter-spacing: 2px;
+    color: var(--white);
+    margin: 0;
+    margin-top: 35px;
+    margin-bottom: 175px; /* This pushes the title down so it sits nicely in the middle of the hero image */
+    text-shadow: var(--theme-color) 2px 2px 5px; /* Adds a subtle shadow in your theme color for extra depth */
+  }
+
+  .about p {
+    color: var(--text-color);
+    opacity: 1;
+    position: relative;
+    z-index: 10;
+    margin: 0;
+  }
+
+  /* --- The Modern Badge Hours Section --- */
+  .hours-section {
+    text-align: center;
+    margin: 4rem 0;
+  }
+
+  .hours-container {
+    max-width: 420px;
+    margin: 2rem auto 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; /* Creates nice breathing room between the days */
+  }
+
+  .hours-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.1); /* A very soft, subtle separator line */
+  }
+
+  /* Removes the line under the very last row */
+  .hours-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  /* The playful, larger day text */
+  .day {
+    font-family: 'Chelsea Market', cursive;
+    font-size: 1.4rem;
+    color: var(--text-color);
+    letter-spacing: 1px;
+  }
+
+  /* The rounded time box */
+  .time-badge {
+    background-color: var(--theme-color); /* Uses your language-specific color */
+    color: var(--bg-color); /* The off-white text */
+    padding: 0.4rem 1.2rem;
+    border-radius: 50px; /* This creates the perfect rounded pill shape */
+    font-size: 1.05rem;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adds a tiny bit of depth */
+  }
+
+  /* The grayed-out closed state */
+  .time-badge.closed {
+    background-color: #d4d4d4; /* A soft, inactive gray */
+    color: #737373; /* Darker gray text for readability */
+    box-shadow: none; /* Flattening the shadow makes it look properly inactive */
+  }
+</style>

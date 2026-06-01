@@ -1,0 +1,19 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getTranslations } from "../../utils/translations";
+
+import aboutData from "../../content/about.json";
+
+const lang =  "en";
+
+const t = getTranslations(lang);
+---
+
+<BaseLayout title="About Us | Hjort Olârs" lang={lang}>
+
+  <section id="about">
+    <h2>{t.about}</h2>
+    <p>{aboutData.text_en}</p>
+  </section>
+
+</BaseLayout>

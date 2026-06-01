@@ -1,0 +1,36 @@
+---
+// src/components/separator.astro
+
+// 1. Define the prop we want to accept
+export interface Props {
+  variant?: "A" | "B";
+}
+
+// 2. Grab the prop, and set "A" as the default so your old code doesn't break!
+const { variant = "A" } = Astro.props;
+
+// 3. Choose the image based on the variant
+// (Make sure to replace these with your exact file names!)
+const imageSrc = variant === "A" ? "/images/separator_1.png" : "/images/separator_2.png";
+---
+
+<div class="image-separator">
+  <img src={imageSrc} alt="" aria-hidden="true" />
+</div>
+
+<style>
+  .image-separator {
+    display: flex;
+    justify-content: center; /* Centers the image perfectly */
+    margin: 4rem 0; /* Adds 4rem of empty space above and below the image */
+    width: 100%;
+    z-index: 10; /* Ensures the separator is above any background elements */
+  }
+
+  .image-separator img {
+    max-width: 200px; /* Prevents the image from being massive. Adjust this number! */
+    height: auto;
+    opacity: 1; /* Slightly softens the image to blend it into the background */
+    z-index: 10; /* Ensures the image itself is above any background elements */
+  }
+</style>

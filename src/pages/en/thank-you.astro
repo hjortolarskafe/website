@@ -1,0 +1,45 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Separator from "../../components/separator.astro";
+
+const lang = "en";
+---
+
+<BaseLayout title="Thank You! | Hjort Olârs Café" lang={lang}>
+    <Separator />
+
+    <section id="thank-you" style="text-align: center; padding-top: 4rem;">
+        <h2>Thank You for Your Inquiry!</h2>
+        <p>
+            We have received your information and will get back to you as soon
+            as possible.
+        </p>
+
+        <Separator />
+
+        <a href={`/${lang}/`} class="return-button">Back to Home Page</a>
+    </section>
+
+    <Separator />
+</BaseLayout>
+
+<style>
+    .return-button {
+        display: inline-block;
+        background-color: var(--theme-color);
+        color: var(--bg-color);
+        padding: 0.8rem 1.5rem;
+        text-decoration: none;
+        font-weight: bold;
+        border-radius: 4px;
+        margin-top: 1rem;
+        transition:
+            background-color 0.2s ease,
+            transform 0.2s ease;
+    }
+
+    .return-button:hover {
+        transform: scale(1.02);
+        opacity: 0.9;
+    }
+</style>

@@ -1,0 +1,48 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Separator from "../../components/separator.astro";
+
+const lang = "sv";
+---
+
+<BaseLayout title="Tack! | Hjort Olârs Café" lang={lang}>
+
+    <section id="thank-you" style="text-align: center; padding-top: 4rem;">
+        <h2>Tack för din förfrågan!</h2>
+        <p>
+            Vi har mottagit dina uppgifter och kommer att höra av oss så snart
+            som möjligt.
+
+            <br />
+            <br />
+            Notera att detta inte är en bokningsbekräftelse. Vi kommer att höra av oss om
+            det finns tillgängliga platser för ditt önskade datum och diskutera eventuella detaljer.
+        </p>
+
+        <Separator />
+
+        <a href={`/${lang}/`} class="return-button">Tillbaka till startsidan</a>
+    </section>
+
+</BaseLayout>
+
+<style>
+    .return-button {
+        display: inline-block;
+        background-color: var(--theme-color);
+        color: var(--bg-color);
+        padding: 0.8rem 1.5rem;
+        text-decoration: none;
+        font-weight: bold;
+        border-radius: 4px;
+        margin-top: 1rem;
+        transition:
+            background-color 0.2s ease,
+            transform 0.2s ease;
+    }
+
+    .return-button:hover {
+        transform: scale(1.02);
+        opacity: 0.9;
+    }
+</style>

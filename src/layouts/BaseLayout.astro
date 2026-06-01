@@ -1,41 +1,19 @@
 ---
+import { getTranslations } from "../utils/translations";
+
 const { title, lang } = Astro.props as {
   title: string;
   lang: "sv" | "en" | "de";
 };
 
-// A simple dictionary for our sticky footer links
-const navTranslations = {
-  sv: {
-    about: "Om oss",
-    menu: "Dagens Meny",
-    openingHours: "Öppettider",
-    gallery: "Bilder",
-    location: "Hitta hit",
-    contact: "Kontakt",
-  },
-  en: {
-    about: "About us",
-    menu: "Today's Menu",
-    openingHours: "Opening Hours",
-    gallery: "Pictures",
-    location: "Location",
-    contact: "Contact",
-  },
-  de: {
-    about: "Über uns",
-    menu: "Heutiges Menü",
-    openingHours: "Öffnungszeiten",
-    gallery: "Galerie",
-    location: "Anfahrt",
-    contact: "Kontakt",
-  },
-} as const;
+const t = getTranslations(lang);
 
-// This grabs the right language, and defaults to Swedish if something goes wrong
-const t =
-  navTranslations[lang as keyof typeof navTranslations] ||
-  navTranslations["sv"];
+const currentPath = Astro.url.pathname;
+
+function getLangLink(targetLang: string) {
+  // This looks at the start of the URL and swaps /sv, /en, or /de for the target language
+  return currentPath.replace(/^\/(sv|en|de)/, `/${targetLang}`);
+}
 ---
 
 <html lang={lang}>
@@ -44,147 +22,179 @@ const t =
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <title>{title}</title>
+
+    <!-- Google Fonts: Antic Slab for body, Chelsea Market for headings -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Antic+Slab:wght@400;700&family=Chelsea+Market&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <div class="parallax-container">
-      <div class="parallax-layer wallpaper-layer"></div>
-    </div>
 
-    <header>
-      <h1>Hjort Olârs</h1>
-      <nav class="lang-switcher">
-        <a href="/sv/" class={lang === "sv" ? "active" : ""}>Svenska</a>
-        <a href="/en/" class={lang === "en" ? "active" : ""}>English</a>
-        <a href="/de/" class={lang === "de" ? "active" : ""}>Deutsch</a>
-      </nav>
-    </header>
+
+    <nav class="sticky-header">
+      <a href={`/${lang}/`} class="header-logo">
+        HJoRT ôLARS
+      </a>
+
+      <div class="main-nav">
+        <a href={`/${lang}/about`}>{t.about}</a>
+        <span class="divider">|</span>
+        <a href={`/${lang}/menu`}>{t.menu}</a>
+        <span class="divider">|</span>
+        <a href={`/${lang}/good-to-know`}>{t.goodToKnow}</a>
+        <span class="divider">|</span>
+        <a href={`/${lang}/afternoon-tea`}>{t.afternoonTea}</a>
+        <span class="divider">|</span>
+        <a href={`/${lang}/booking`}>{t.booking}</a>
+      </div>
+    </nav>
 
     <main>
       <slot />
     </main>
 
-    <nav class="sticky-footer">
-      <a href="#about">{t.about}</a>
-      <a href="#menu">{t.menu}</a>
-      <a href="#opening-hours">{t.openingHours}</a>
-      <a href="#gallery">{t.gallery}</a>
-      <a href="#location">{t.location}</a>
-      <a href="#contact">{t.contact}</a>
-    </nav>
+    <footer class="site-footer">
+      <div class="footer-section left">
+        <div class="social-links">
+          <a href="https://www.instagram.com/hjortolarskafe/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <img src="/icons/instagram-logo-bold.svg" alt="Instagram Icon" class="social-icon" />
+          </a>
+          <a href="https://www.facebook.com/HjortOlars/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+            <img src="/icons/facebook-logo-bold.svg" alt="Facebook Icon" class="social-icon" />
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-section center">
+        <div class="contact-info">
+          <a href="mailto:hjortolarskafe@hotmail.com">hjortolarskafe@hotmail.com</a>
+          <span class="divider">|</span>
+          <a href="tel:0701234567">070-123 45 67</a>
+          <span class="divider">|</span>
+          <a href="map:Hagvägen 60, 785 44 Dala-Floda">Hagvägen 60, Dala-Floda</a>
+        </div>
+      </div>
+      
+      <div class="footer-section right">
+        <div class="lang-dropdown-container">
+          
+          <button class="lang-toggle" id="langToggle">
+            
+            <span class="custom-globe-wrapper">
+              <img src="/icons/globe.svg" alt="Language Icon" class="custom-globe-img" />
+              
+              <img src={`/icons/globe_${lang}.svg`} alt="Country Flag" class="hover-flag-img" />
+            </span>
+            
+            <span>{t.language}</span>
+          </button>
+
+          <nav class="lang-menu" id="langMenu">
+            <a href={getLangLink("sv")} class={lang === "sv" ? "active" : ""}>Svenska</a>
+            <a href={getLangLink("en")} class={lang === "en" ? "active" : ""}>English</a>
+            <a href={getLangLink("de")} class={lang === "de" ? "active" : ""}>Deutsch</a>
+          </nav>
+          
+        </div>
+      </div>
+    </footer>
   </body>
 </html>
 
 <style is:global>
-  /* 1. Define some cozy café colors */
+  /* Define some cozy café colors */
   :root {
-    --bg-color: #fafaf7; /* Warm off-white */
-    --text-color: #421909; /* Dark espresso brown for softer contrast */
-    --accent-color: #ffffff; /* Muted forest green */
-    --link-color: #a67b5b; /* Warm caramel/wood tone */
-    --red-color: #811515; /* Falu-röd */
-    --blue-color: #081d4d; /* Dala-blå */
+    --bg-color: #eae8e6; /* Warm off-white */
+    --text-color: #202020; /* Dark espresso brown for softer contrast */
+    --accent-color: #202020; /* Muted forest green */
+    --link-color: #5b64a6; /* Warm caramel/wood tone */
     --black: #000000; /* Black for text and accents */
     --white: #ffffff; /* White for backgrounds and accents */
+    --h2-color: #202020; /* Dark espresso brown for headings */
+
+    --red-color: #811515; /* Falu-röd */
+    --blue-color: #1b48b1; /* Dala-blå */
+    --green-color: #208e3f; /* Skogsgrön */
   }
+
+  html[lang="sv"] { --theme-color: var(--red-color); }
+  html[lang="en"] { --theme-color: var(--blue-color); }
+  html[lang="de"] { --theme-color: var(--green-color); }
 
   html {
     scroll-behavior: smooth;
+    background-color: var(--theme-color);
   }
 
-  /* 2. Basic Reset and Typography */
+  /* Basic Reset and Typography */
   * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
   }
 
-  body {
-    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    line-height: 1.6;
-  }
-
-  /* 3. Layout constraints to make it readable */
+  /* Layout constraints to make it readable */
   main {
     max-width: 800px;
     margin: 0 auto; /* Centers the content on the screen */
     padding: 2rem;
+    flex: 1 0 auto;
   }
 
-  /* 4. Styling the Header & Navigation */
-  header {
-    text-align: center;
-    padding: 3rem 1rem 2rem;
-  }
 
-  header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    letter-spacing: 1px;
-  }
+  body {
+    font-family: 'Antic Slab', serif;
+    font-size: 1.3em;
+    font-weight: 400;
+    color: var(--text-color);
+    line-height: 1.6;
+    
+    /* The new static background setup */
+    background-color: var(--bg-color); /* Fallback color */
+    background-image: url("/background/background.png"); /* Replace with your actual image filename! */
+    background-size: cover; /* Ensures it covers the whole screen */
+    background-position: top center; /* Centers the image */
 
-  /* --- The Floating Language Switcher --- */
-  .lang-switcher {
-    position: absolute; /* Locks it to the screen */
-    top: 2rem;
-    right: 2rem;
-    z-index: 1000; /* Ensures it stays on top of the parallax and text */
+    /* Keeps your header from covering content */
+    padding-top: 4rem; 
+
     display: flex;
-    gap: 1rem;
+    flex-direction: column;
+    min-height: 100vh;
   }
 
-  .lang-switcher a {
-    background-color: rgba(255, 255, 255, 0.25); /* Semi-transparent white */
-    color: var(--black);
-    padding: 0.5rem 1.2rem;
-    border-radius: 50px; /* Gives them a rounded, cloud-like pill shape */
-    text-decoration: none;
-    font-weight: bold;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow to make them float */
-    transition:
-      transform 0.2s ease,
-      background-color 0.2s ease;
-  }
 
-  .lang-switcher a:hover {
-    transform: translateY(
-      -3px
-    ); /* Makes them "float" up slightly when hovered */
-    background-color: rgba(255, 255, 255, 0.75); /* Semi-transparent white */
-  }
 
-  .lang-switcher a.active {
-    background-color: rgba(255, 255, 255, 0.25); /* Semi-transparent white */
-    color: var(--black);
-  }
 
-  /* 5. Styling the Sections */
+  /* Styling the Sections */
   section {
-    margin-bottom: 4rem; /* Adds nice breathing room between sections */
+    margin-bottom: 4rem;
     padding-top: 1rem;
+    text-align: center;
   }
 
   h2 {
-    color: var(--accent-color);
+    font-family: 'Chelsea Market';
+    color: var(--theme-color);
     font-size: 1.8rem;
-    margin-bottom: 1rem;
+    margin: 0 auto 1rem auto;
     border-bottom: 2px solid #ebebe3;
     padding-bottom: 0.5rem;
+    display: inline-block;
   }
 
   p {
     margin-bottom: 1rem;
   }
 
-  /* 6. Links and Lists */
+  /* Links and Lists */
   a {
-    color: var(--link-color);
+    color: var(--theme-color);
     text-decoration: none;
   }
 
   a:hover {
-    text-decoration: underline;
+    text-decoration: none;
   }
 
   ul {
@@ -193,13 +203,284 @@ const t =
     gap: 1.5rem;
   }
 
-  /* 7. Contact Form Styles */
+
+
+
+
+
+
+  /* The Sleek Sticky Navigation */
+  .sticky-header {
+    display: none !important; /* Hides the header on mobile by default */
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 100%);
+    z-index: 2000;
+    padding: 2rem 2rem; /* Much thinner padding now! */
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* The new small typography logo */
+  .header-logo {
+    font-family: 'Chelsea Market';
+    font-size: 1.4rem;
+    color: var(--bg-color); /* Uses your warm off-white */
+    text-decoration: none;
+    letter-spacing: 1px;
+    white-space: nowrap; /* Prevents the name from breaking into two lines */
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Adds a soft drop shadow */
+  }
+
+  .header-logo:hover {
+    transform: scale(1.05); /* Slight pop when hovered */
+    opacity: 0.9;
+  }
+
+  .main-nav {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .main-nav a {
+    color: var(--bg-color);
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.8rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Adds a soft drop shadow */
+  }
+
+  .main-nav a:hover {
+    background-color: var(--text-color);
+  }
+
+  .main-nav .divider {
+    color: var(--bg-color);
+  }
+
+
+
+
+  /* --- The Main Footer --- */
+  .site-footer {
+    width: 100%;
+    background-color: var(--theme-color); 
+    border-top: 2px solid #ebebe3;
+    
+    /* 1. Remove position: fixed, bottom, left, and z-index */
+    
+    /* 2. Add breathing room! */
+    padding: 3rem 2rem 4rem 2rem; /* Top, Right, Bottom, Left */
+    margin-top: 5rem; /* Pushes the footer away from the page content */
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-section {
+    display: flex;
+    align-items: center;
+    flex: 1; /* Magic trick: Forces all three blocks to take up the exact same amount of space */
+  }
+
+  .footer-section.left {
+    justify-content: flex-start; /* Pushes socials to the far left */
+  }
+
+  .footer-section.center {
+    justify-content: center; /* Locks contact info dead center */
+  }
+
+  .footer-section.right {
+    justify-content: flex-end; /* Pushes language buttons to the far right */
+  }
+
+  .social-links {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .social-icon {
+    width: 28px; /* Adjust this number to make the icons bigger or smaller */
+    height: 28px;
+    object-fit: contain;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .social-links a:hover .social-icon {
+    transform: scale(1.15); /* A satisfying little pop/zoom effect */
+    opacity: 0.8;
+  }
+
+  .social-links a {
+    color: var(--white);
+    font-weight: bold;
+    font-size: 0.9rem;
+  }
+
+
+
+  /* --- Smart Language Dropdown --- */
+  .lang-dropdown-container {
+    position: relative; /* Acts as an anchor for the popup menu */
+  }
+
+  .lang-toggle {
+    background-color: transparent;
+    color: var(--white);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.2s, border-color 0.2s;
+  }
+
+  .lang-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--white);
+  }
+
+  /* --- Custom Language Icon & Hover Swap --- */
+  .custom-globe-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px; 
+    height: 20px;
+  }
+
+  /* The default globe image */
+  .custom-globe-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: opacity 0.2s ease; 
+  }
+
+  /* The new SVG flag (pinned directly on top of the globe) */
+  .hover-flag-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0; /* Completely invisible by default */
+    transition: opacity 0.2s ease;
+    pointer-events: none; /* Prevents it from blocking clicks */
+  }
+
+  /* THE HOVER MAGIC */
+  /* 1. Fade the custom globe out */
+  .lang-toggle:hover .custom-globe-img {
+    opacity: 0; 
+  }
+  
+  /* 2. Fade the SVG flag in! */
+  .lang-toggle:hover .hover-flag-img {
+    opacity: 1; 
+  }
+
+  /* The Popup Menu */
+  .lang-menu {
+    position: absolute;
+    bottom: 120%; /* Pushes the menu UP, above the footer */
+    right: 0;
+    background-color: var(--bg-color);
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1); /* Shadow points up */
+    overflow: hidden;
+    min-width: 140px;
+  }
+
+  /* When JavaScript adds this class, the menu appears */
+  .lang-menu.show {
+    display: flex;
+  }
+
+  .lang-menu a {
+    padding: 0.6rem 1rem;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: normal;
+    border-bottom: 1px solid #ebebe3;
+    transition: background-color 0.2s;
+  }
+
+  .lang-menu a:last-child {
+    border-bottom: none;
+  }
+
+  .lang-menu a:hover {
+    background-color: #fff;
+  }
+
+  .lang-menu a.active {
+    font-weight: bold;
+    color: var(--theme-color);
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+
+
+
+
+  /* --- Footer Contact Info --- */
+  .contact-info {
+    font-size: 0.85rem;
+    color: var(--white);
+    opacity: 0.9;
+  }
+
+  .contact-info a {
+    color: inherit;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .contact-info a:hover {
+    opacity: 0.6; /* A soft fade effect when hovered */
+    text-decoration: underline;
+  }
+
+  .contact-info .divider {
+    margin: 0 0.5rem;
+    opacity: 0.5;
+  }
+
+
+
+
+  /* Contact Form Styles */
   .contact-form {
     max-width: 500px;
-    margin-top: 2rem;
+    margin: 2rem auto 0 auto;
     display: flex;
     flex-direction: column;
     gap: 1.2rem;
+    text-align: left;
   }
 
   .form-group {
@@ -214,18 +495,21 @@ const t =
   }
 
   .contact-form input,
-  .contact-form textarea {
+  .contact-form textarea,
+  .contact-form select {
     padding: 0.8rem;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-family: inherit;
     font-size: 1rem;
     background-color: #fff;
+    width: 100%;
   }
 
   .contact-form input:focus,
-  .contact-form textarea:focus {
-    outline: 2px solid var(--accent-color);
+  .contact-form textarea:focus,
+  .contact-form select:focus {
+    outline: 2px solid var(--theme-color);
     border-color: transparent;
   }
 
@@ -245,217 +529,65 @@ const t =
     background-color: var(--text-color);
   }
 
-  /* 8. Parallax Background System */
-  .parallax-container {
-    position: fixed; /* Locks the container to the screen */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh; /* Covers the full height of the screen */
-    z-index: -1; /* Pushes it behind all your text and images */
-    overflow: hidden;
-    background-color: #87ceeb; /* A fallback sky-blue color for the very back */
-  }
 
-  .parallax-layer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    /* 1. Make the layers 130% of the screen height so we have room to scroll up */
-    height: 130vh;
-    /* 2. Anchor the images to the top (the sky) instead of the bottom */
-    background-position: center top;
-    background-repeat: no-repeat;
-    background-size: cover;
-    will-change: transform;
-  }
 
-  .wallpaper-layer {
-    background-image: url("/background/background.jpg"); /* Put your seamless wallpaper here! */
-  }
 
-  /* IMPORTANT: Update your body tag background */
-  body {
-    /* Find your existing 'body' rule at the top of the CSS and change 
-       background-color to transparent so we can see the parallax behind it! */
-    background-color: transparent;
-  }
-
-  /* --- Instagram Grid --- */
-  .instagram-grid {
-    display: grid;
-    /* This ensures the Instagram embeds don't get squished too small */
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2rem;
-    margin-top: 1.5rem;
-    justify-items: center; /* Centers the posts if there is extra space */
-  }
-
-  /* Placeholder styles just so you can see the boxes right now */
-  .ig-placeholder {
-    width: 100%;
-    max-width: 320px;
-    height: 400px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 1px dashed var(--accent-color);
-    border-radius: 8px;
+  /* --- Opening Hours --- */
+  .hours-list {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    color: var(--accent-color);
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 400px;
+    margin: 0 auto; /* Centers the list in the middle of the screen */
+    padding: 0;
   }
 
-  /* --- Sticky Bottom Navigation --- */
-  .sticky-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: var(--red-color); /* Uses your forest green */
-    padding: 0.8rem;
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    z-index: 2000; /* Keeps it above absolutely everything */
-    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.15); /* Adds a shadow above it */
+  /* --- Deviating / Override Hours --- */
+  .deviating-hours {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 2px dashed #ebebe3;
   }
 
-  .sticky-footer a {
-    color: var(--bg-color); /* White text */
-    text-decoration: none;
+  .deviating-hours h3 {
+    color: var(--red-color); /* Uses your Falu-red to grab attention! */
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .closed-notice {
+    color: var(--red-color);
     font-weight: bold;
-    font-size: 0.95rem;
-    padding: 0.5rem 1rem;
+    background-color: rgba(129, 21, 21, 0.05); /* Very soft red background */
+    padding: 0.5rem;
     border-radius: 4px;
-    transition: background-color 0.2s;
   }
 
-  .sticky-footer a:hover {
-    background-color: var(--text-color); /* Dark brown on hover */
+  .date-highlight {
+    opacity: 0.9;
   }
 
-  /* --- Menu Section --- */
-  .menu-grid {
-    display: grid;
-    /* This creates as many columns as will fit, with a minimum width of 280px */
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem 3rem; /* 1.5rem vertical space, 3rem horizontal space */
-    margin-top: 1.5rem;
-  }
-
-  .menu-item {
-    /* Removed the heavy background and box-shadow */
-    padding-bottom: 1rem;
-    border-bottom: 1px dotted var(--accent-color); /* A classy dotted separator line */
-  }
-
-  .menu-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline; /* Aligns the text to the bottom baseline */
-    margin-bottom: 0.3rem;
-    gap: 1rem;
-  }
-
-  .menu-item h3 {
-    color: var(--text-color);
-    font-size: 1.1rem;
-    margin: 0;
-    font-weight: 700;
-  }
-
-  .menu-item p {
-    font-size: 0.9rem;
-    margin: 0;
-    opacity: 0.85; /* Softens the description text slightly */
-  }
-
-  /* --- Dietary Flags --- */
-  .dietary-flags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-  }
-
-  .flag {
-    font-size: 0.7rem;
-    font-weight: bold;
-    padding: 0.2rem 0.5rem;
-    border-radius: 50px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  /* Specific colors for different flags */
-  .flag-vegan {
-    background-color: #4caf50;
-    color: white;
-  }
-  .flag-vegetarisk {
-    background-color: #8bc34a;
-    color: #333;
-  }
-  .flag-glutenfri {
-    background-color: #ffc107;
-    color: #333;
-  }
-  .flag-laktosfri {
-    background-color: #03a9f4;
-    color: white;
-  }
-  .flag-nötfri {
-    background-color: #9c27b0;
-    color: white;
-  }
-
-  /* --- The Clickable Pictures (Props) --- */
-  .interactive-props {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 3rem;
-    margin-top: 4rem;
-    z-index: 10;
-  }
-
-  /* These are now <a> tags instead of <div>s */
-  .clickable-prop {
-    display: block; /* Required for anchor tags to have width/height */
-    text-decoration: none;
-    cursor: pointer;
-    background-color: rgba(166, 123, 91, 0.9); /* Frame placeholder */
-    color: white;
-    padding: 3rem 2rem;
-    border-radius: 8px;
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    text-align: center;
-    width: 200px;
-    height: 250px; /* Makes them look like portrait picture frames */
-  }
-
-  .clickable-prop:hover {
-    transform: scale(1.05) rotate(-2deg);
-  }
-
-
-  /* We need to add padding to the bottom of the body so the 
-     footer doesn't cover up the very bottom of your contact form! */
-  body {
-    padding-bottom: 5rem;
-  }
 </style>
 
 <script>
-  document.addEventListener("scroll", () => {
-    const scrollPosition = window.scrollY;
-    const wallpaper = document.querySelector(".wallpaper-layer") as HTMLElement;
+  // Wait for the page to load
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.getElementById('langToggle');
+    const menu = document.getElementById('langMenu');
 
-    if (wallpaper) {
-      // Moves the wallpaper up slightly as you scroll down
-      wallpaper.style.transform = `translateY(-${scrollPosition * 0.15}px)`;
+    if (toggle && menu) {
+      // Toggle the menu when the button is clicked
+      toggle.addEventListener('click', (event) => {
+        event.stopPropagation(); // Stops the click from immediately triggering the document click listener below
+        menu.classList.toggle('show');
+      });
+
+      // Close the menu if the user clicks anywhere else on the page
+      document.addEventListener('click', (event) => {
+        if (!menu.contains(event.target as Node) && !toggle.contains(event.target as Node)) {
+          menu.classList.remove('show');
+        }
+      });
     }
   });
 </script>

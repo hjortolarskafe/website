@@ -1,0 +1,352 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import hoursData from "../../data/openingHours.json";
+import Separator from "../../components/separator.astro";
+
+import { getTranslations } from "../../utils/translations";
+
+const lang = "sv";
+
+const t = getTranslations(lang);
+
+const days = [
+  { name: t.monday, hours: hoursData.monday },
+  { name: t.tuesday, hours: hoursData.tuesday },
+  { name: t.wednesday, hours: hoursData.wednesday },
+  { name: t.thursday, hours: hoursData.thursday },
+  { name: t.friday, hours: hoursData.friday },
+  { name: t.saturday, hours: hoursData.saturday },
+  { name: t.sunday, hours: hoursData.sunday },
+];
+
+// --- EVENT LOGIC ---
+type EventItem = {
+  title: string;
+  date: string; // Keystatic saves dates as 'YYYY-MM-DD' strings
+  description?: string;
+  eventType?: string;
+  hasAvailableSpots?: boolean; // Optional property to check if there are spots left for booking
+};
+
+// Fetch all events
+const eventModules = import.meta.glob("../../data/events/*.json", {
+  eager: true,
+});
+const allEvents = Object.values(eventModules) as EventItem[];
+
+// Set up our time boundaries (strip out the time, focus only on the day)
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const threeDaysFromNow = new Date(today);
+threeDaysFromNow.setDate(today.getDate() + 3);
+
+// 1. Filter events to only those happening between Today and 3 days from now
+const relevantEvents = allEvents.filter((event) => {
+  const eventDate = new Date(event.date);
+  eventDate.setHours(0, 0, 0, 0);
+  return eventDate >= today && eventDate <= threeDaysFromNow;
+});
+
+// 2. Sort them chronologically (soonest first)
+relevantEvents.sort(
+  (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+);
+
+// 3. Split into "Today" and "Upcoming"
+const todaysEvents = relevantEvents.filter((e) => {
+  const ed = new Date(e.date);
+  ed.setHours(0, 0, 0, 0);
+  return ed.getTime() === today.getTime();
+});
+
+const upcomingEvents = relevantEvents.filter((e) => {
+  const ed = new Date(e.date);
+  ed.setHours(0, 0, 0, 0);
+  return ed.getTime() > today.getTime();
+});
+
+const privateEvents = allEvents
+  .filter((event) => event.eventType !== 'open')
+  .filter((event) => {
+    const eventDate = new Date(event.date);
+    eventDate.setHours(0, 0, 0, 0);
+    return eventDate >= today;
+  })
+  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+---
+
+<BaseLayout title="Bra att veta | Hjort Olârs" lang={lang}>
+
+  <section id="opening-hours">
+    <h2>{t.openingHours}</h2>
+
+    <div class="hours-container">
+      {days.map((day) => {
+        // MAGIC CHECK: Is the Keystatic field empty? Or did they manually type "stängt"?
+        const isClosed = !day.hours || day.hours.toLowerCase() === "stängt";
+
+        return (
+          <div class="hours-row">
+            <span class="day">{day.name}</span>
+            <span class={`time-badge ${isClosed ? 'closed' : ''}`}>
+              {/* If it's closed, print "Stängt". Otherwise, print the Keystatic time! */}
+              {isClosed ? "Stängt" : day.hours}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+
+    {privateEvents.length > 0 && (
+      <div class="deviating-hours">
+        <h3>Avvikande öppettider</h3>
+        <ul class="hours-list">
+          {privateEvents.map((event) => (
+            <li class="closed-notice">
+              <span class="date-highlight">{event.date}</span> 
+              <span>Stängt ({event.title || (
+                event.eventType === 'private' ? "Abonnerat" : 
+                event.eventType === 'afternoon-tea' ? "Endast Afternoon Tea" : 
+                "Tillfälligt stängt"
+              )})</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </section>
+
+  <Separator />
+
+  <section id="events">
+    <h2>Kalender</h2>
+
+    {
+      todaysEvents.length === 0 && upcomingEvents.length === 0 ? (
+        <p style="opacity: 0.8;">
+          Inget speciellt inplanerat de närmaste dagarna. Varmt välkommen in på
+          en vanlig fika!
+        </p>
+      ) : (
+        <div class="events-container">
+          {todaysEvents.length > 0 && (
+            <div class="event-group todays-events">
+              <h3>Idag!</h3>
+              {todaysEvents.map((event) =>
+                event.eventType === "afternoon-tea" /* CLICKABLE LINK FOR TEA EVENTS */ ? (
+                  <a href={`/${lang}/afternoon-tea/`} class="event-card highlight clickable-card">
+                    <h4>{event.title}</h4>
+                    <p>{event.description}</p>
+                    <span class="booking-prompt">
+                      Klicka här för att boka din plats!
+                    </span>
+                  </a>
+                ) : (
+                  /* NORMAL CARD FOR REGULAR EVENTS */
+                  <div class="event-card highlight">
+                    <h4>{event.title}</h4>
+                    <p>{event.description}</p>
+                  </div>
+                ),
+              )}
+            </div>
+          )}
+
+          {upcomingEvents.length > 0 && (
+            <div class="event-group upcoming-events">
+              <h3>Kommande (nästa 3 dagarna)</h3>
+              {upcomingEvents.map((event) =>
+                event.eventType === "afternoon-tea" ? (
+                  /* CLICKABLE LINK FOR TEA EVENTS */
+                  <a
+                    href={`/${lang}/afternoon-tea/`}
+                    class="event-card clickable-card"
+                  >
+                    <span class="event-date">{event.date}</span>
+                    <h4>{event.title}</h4>
+                    <p>{event.description}</p>
+                    {event.hasAvailableSpots === false ? (
+                      <span
+                        class="booking-prompt"
+                        style="color: #666; text-decoration: none;"
+                      >
+                        Tyvärr fullbokat!
+                      </span>
+                    ) : (
+                      <span class="booking-prompt">
+                        Klicka här för att boka din plats!
+                      </span>
+                    )}
+                  </a>
+                ) : (
+                  /* NORMAL CARD FOR REGULAR EVENTS */
+                  <div class="event-card">
+                    <span class="event-date">{event.date}</span>
+                    <h4>{event.title}</h4>
+                    <p>{event.description}</p>
+                  </div>
+                ),
+              )}
+            </div>
+          )}
+        </div>
+      )
+    }
+  </section>
+
+  <Separator />
+
+  <section id="location">
+    <h2>{t.location}</h2>
+    <p>Hagvägen 60, 785 44 Dala-Floda</p>
+
+    <iframe
+      src="https://maps.google.com/maps?q=Hagv%C3%A4gen%2060,%20785%2044%20Dala-Floda,%20Sweden&t=&z=15&ie=UTF8&iwloc=&output=embed"
+      width="100%"
+      height="400"
+      style="border:0; border-radius: 8px; margin-top: 1rem;"
+      allowfullscreen=""
+      loading="lazy"
+    >
+    </iframe>
+  </section>
+
+</BaseLayout>
+
+<style>
+
+  /* --- Event Calendar Styles --- */
+  .events-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: left; /* Keep text readable inside the centered container */
+  }
+
+  .event-group h3 {
+    color: var(--theme-color);
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+    text-align: center;
+  }
+
+  .event-card {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1rem;
+  }
+
+  /* Make today's events stand out! */
+  .event-card.highlight {
+    border-left-color: var(--theme-color);
+    background: #fff;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    transform: scale(1.02); /* Makes it slightly bigger */
+  }
+
+  .event-card h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+    color: var(--text-color);
+  }
+
+  .event-card p {
+    margin: 0;
+    font-size: 0.95rem;
+    opacity: 0.85;
+  }
+
+  .event-date {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: var(--theme-color);
+    background: rgba(0, 0, 0, 0.05);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+
+  a.clickable-card {
+    display: block; /* Forces the link to behave like a box instead of text */
+    text-decoration: none; /* Removes the ugly blue underline */
+    color: inherit; /* Keeps your text colors intact */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+  }
+
+  a.clickable-card:hover {
+    transform: translateY(-3px) scale(1.02); /* Lifts the card up slightly */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); /* Adds a deeper shadow on hover */
+    border-left-color: var(--theme-color); /* Ensures the left border pops! */
+  }
+
+  .booking-prompt {
+    display: inline-block;
+    margin-top: 0.8rem;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: var(--theme-color);
+    text-decoration: underline;
+  }
+
+  /* --- The Modern Badge Hours Section --- */
+  .hours-section {
+    text-align: center;
+    margin: 4rem 0;
+  }
+
+  .hours-container {
+    max-width: 420px;
+    margin: 2rem auto 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; /* Creates nice breathing room between the days */
+  }
+
+  .hours-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.1); /* A very soft, subtle separator line */
+  }
+
+  /* Removes the line under the very last row */
+  .hours-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  /* The playful, larger day text */
+  .day {
+    font-family: 'Chelsea Market', cursive;
+    font-size: 1.4rem;
+    color: var(--text-color);
+    letter-spacing: 1px;
+  }
+
+  /* The rounded time box */
+  .time-badge {
+    background-color: var(--theme-color); /* Uses your language-specific color */
+    color: var(--bg-color); /* The off-white text */
+    padding: 0.4rem 1.2rem;
+    border-radius: 50px; /* This creates the perfect rounded pill shape */
+    font-size: 1.05rem;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adds a tiny bit of depth */
+  }
+
+  /* The grayed-out closed state */
+  .time-badge.closed {
+    background-color: #d4d4d4; /* A soft, inactive gray */
+    color: #737373; /* Darker gray text for readability */
+    box-shadow: none; /* Flattening the shadow makes it look properly inactive */
+  }
+</style>

@@ -1,0 +1,95 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Separator from "../../components/separator.astro";
+import { getTranslations } from "../../utils/translations";
+
+import afternoonTeaData from "../../content/afternoon-tea.json";
+
+const lang = "en";
+const t = getTranslations(lang);
+
+// --- EVENT FETCHING LOGIC ---
+type EventItem = {
+  title: string;
+  date: string;
+  eventType?: string;
+  hasAvailableSpots?: boolean; 
+};
+
+// Fetch all events
+const eventModules = import.meta.glob("../../data/events/*.json", { eager: true });
+const allEvents = Object.values(eventModules) as EventItem[];
+
+// Get today's date at midnight for comparison
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+// Filter to ONLY future events that have the Afternoon Tea checkbox checked
+const teaEvents = allEvents
+  .filter((event) => event.eventType === 'afternoon-tea')
+  .filter((event) => event.hasAvailableSpots !== false)
+  .filter((event) => {
+    const eventDate = new Date(event.date);
+    eventDate.setHours(0, 0, 0, 0);
+    return eventDate >= today;
+  })
+  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // Sort closest first
+---
+
+<BaseLayout title="Afternoon Tea | Hjort Olârs" lang={lang}>
+
+  <section id="afternoon-tea">
+    <h2>{t.afternoonTea}</h2>
+    <p>{afternoonTeaData.text_en}</p>
+  </section>
+
+  <Separator/>
+
+    <form action="https://api.web3forms.com/submit" method="POST" class="contact-form">
+
+        <input type="hidden" name="access_key" value="your-access-key-here"/>
+        <input type="hidden" name="subject" value="New booking request: Afternoon Tea!" />
+
+        <input type="hidden" name="redirect" value="https://localhost:4321/en/thank-you/" />
+        
+        <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="Name" required />
+        </div>
+
+        <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="Email" required />
+        </div>
+
+        <div class="form-group">
+        <label for="date">Desired date</label>
+        <select id="date" name="Selected date" required>
+            <option value="" disabled selected>-- Select an available date --</option>
+
+            {teaEvents.length === 0 ? (
+            <option value="" disabled>No available dates at the moment</option>
+            ) : (
+            teaEvents.map((event) => (
+                <option value={`${event.date} (${event.title})`}>
+                {event.date} - {event.title}
+                </option>
+            ))
+            )}
+        </select>
+        </div>
+
+        <div class="form-group">
+        <label for="guests">Number of guests</label>
+        <input type="number" id="guests" name="Number of guests" min="1" max="10" required />
+        </div>
+
+        <div class="form-group">
+        <label for="message">Message / Allergies</label>
+        <textarea id="message" name="Message" rows="5" placeholder="Please let us know if you have any allergies..."></textarea>
+        </div>
+
+        <button type="submit">Send booking request</button>
+    </form>
+
+</BaseLayout>

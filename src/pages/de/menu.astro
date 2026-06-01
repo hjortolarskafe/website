@@ -1,0 +1,58 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Separator from "../../components/separator.astro";
+
+type MenuItem = {
+  isActive: boolean;
+  title: string;
+  image?: string;
+  description?: string;
+  dietary?: string[];
+};
+
+const menuModules = import.meta.glob("../../data/menu/*.json", { eager: true });
+const allMenuItems = Object.values(menuModules) as MenuItem[];
+const activeMenu = allMenuItems.filter((item) => item.isActive === true);
+---
+
+<BaseLayout title="Dagens Meny | Hjort Olârs" lang="de">
+
+  <Separator/>
+
+  <section id="menu" style="background: rgba(250,250,247,0.95); padding: 2rem; border-radius: 12px;">
+    <h2>Dagens Meny</h2>
+    
+    <div class="menu-grid">
+      {
+        activeMenu.length === 0 ? (
+          <p>Menyn uppdateras just nu...</p>
+        ) : (
+          activeMenu.map((item) => (
+            <div class="menu-item">
+
+              {item.image && (
+                <img src={item.image} alt={item.title} class="menu-item-image" />
+              )}
+              
+              <div class="menu-header">
+                <h3>{item.title}</h3>
+                <div class="dietary-flags">
+                  {item.dietary &&
+                    item.dietary.map((flag) => (
+                      <span class={`flag flag-${flag.toLowerCase()}`}>
+                        {flag}
+                      </span>
+                    ))}
+                </div>
+              </div>
+              <p>{item.description}</p>
+            </div>
+          ))
+        )
+      }
+    </div>
+  </section>
+
+  <Separator/>
+  
+</BaseLayout>

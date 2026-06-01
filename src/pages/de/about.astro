@@ -1,0 +1,23 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Separator from "../../components/separator.astro";
+import { getTranslations } from "../../utils/translations";
+
+const lang =  "sv";
+
+const t = getTranslations(lang);
+---
+
+<BaseLayout title="Om oss | Hjort Olârs" lang="de">
+
+  <Separator/>
+
+  <section id="about">
+    <h2>{t.about}</h2>
+    <p>Välkommen till Hjort Olârs, ditt lokala café med en passion för kvalitet och smak.</p>
+    <p>Vi erbjuder ett brett utbud av kaffe, bakverk och smörgåsar, allt tillagat med omsorg och kärlek.</p>
+  </section>
+
+  <Separator/>
+
+</BaseLayout>

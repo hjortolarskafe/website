@@ -1,9 +1,11 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import Separator from "../../components/separator.astro";
 
 type MenuItem = {
   isActive: boolean;
   title: string;
+  image?: string;
   description?: string;
   dietary?: string[];
 };
@@ -11,12 +13,15 @@ type MenuItem = {
 const menuModules = import.meta.glob("../../data/menu/*.json", { eager: true });
 const allMenuItems = Object.values(menuModules) as MenuItem[];
 const activeMenu = allMenuItems.filter((item) => item.isActive === true);
+
+const lang = "sv";
 ---
 
-<BaseLayout title="Dagens Meny | Hjort Olârs" lang="sv">
+<BaseLayout title="Dagens Meny | Hjort Olârs" lang={lang}>
+
   <section id="menu" style="background: rgba(250,250,247,0.95); padding: 2rem; border-radius: 12px;">
     <h2>Dagens Meny</h2>
-    
+    <p>Vänligen notera att menyn kan komma att ändras under dagen, vi reserverar för att alternativ kan sälja slut.</p>
     <div class="menu-grid">
       {
         activeMenu.length === 0 ? (
@@ -24,6 +29,11 @@ const activeMenu = allMenuItems.filter((item) => item.isActive === true);
         ) : (
           activeMenu.map((item) => (
             <div class="menu-item">
+
+              {item.image && (
+                <img src={item.image} alt={item.title} class="menu-item-image" />
+              )}
+              
               <div class="menu-header">
                 <h3>{item.title}</h3>
                 <div class="dietary-flags">
@@ -42,4 +52,92 @@ const activeMenu = allMenuItems.filter((item) => item.isActive === true);
       }
     </div>
   </section>
+  
 </BaseLayout>
+
+<style>
+
+  /* --- Menu Section --- */
+  .menu-grid {
+    display: grid;
+    /* This creates as many columns as will fit, with a minimum width of 280px */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem 3rem; /* 1.5rem vertical space, 3rem horizontal space */
+    margin-top: 1.5rem;
+  }
+
+  .menu-item {
+    /* Removed the heavy background and box-shadow */
+    padding-bottom: 1rem;
+    border-bottom: 1px dotted var(--accent-color); /* A classy dotted separator line */
+  }
+
+  .menu-item-image {
+    width: 100%;
+    height: 200px; /* Forces all images to be exactly the same height */
+    object-fit: cover; /* Crops the image perfectly to fit the box without squishing it! */
+    border-radius: 8px; /* Soft, café-style rounded corners */
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .menu-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    gap: 0.4rem;
+  }
+
+  .menu-item h3 {
+    color: var(--text-color);
+    font-size: 1.1rem;
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .menu-item p {
+    font-size: 0.9rem;
+    margin: 0;
+    opacity: 0.85; /* Softens the description text slightly */
+  }
+
+  /* --- Dietary Flags --- */
+  .dietary-flags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.3rem;
+  }
+
+  .flag {
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 0.2rem 0.5rem;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Specific colors for different flags */
+  .flag-vegan {
+    background-color: #4caf50;
+    color: white;
+  }
+  .flag-vegetarisk {
+    background-color: #8bc34a;
+    color: #333;
+  }
+  .flag-glutenfri {
+    background-color: #ffc107;
+    color: #333;
+  }
+  .flag-laktosfri {
+    background-color: #03a9f4;
+    color: white;
+  }
+  .flag-nötfri {
+    background-color: #9c27b0;
+    color: white;
+  }
+</style>

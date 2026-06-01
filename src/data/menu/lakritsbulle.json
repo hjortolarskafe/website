@@ -1,0 +1,11 @@
+{
+  "title": "Lakritsbulle",
+  "image": "/images/menu/lakritsbulle/image.jpg",
+  "description": "Mmmm, mums",
+  "isActive": true,
+  "dietary": [
+    "Glutenfri",
+    "Laktosfri",
+    "Nötfri"
+  ]
+}
