@@ -4,11 +4,11 @@ export default config({
   // 'local' means it saves files straight to your computer right now.
   // We will change this to 'github' later when we put it live!
   storage: {
-    kind: 'github',
-    repo: {
-      owner: 'hjortolarskafe',
-      name: 'website',
-    },
+    kind: 'local',
+    // repo: {
+    //   owner: 'hjortolarskafe',
+    //   name: 'website',
+    // },
   },
   
   // Singletons are for things where there is only ONE of them (like site settings or opening hours)

@@ -1,11 +1,18 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
-import node from 'astro/logger/node';
+// Note: I removed the `import node from 'astro/logger/node';` as it was unused and could cause issues.
+
+// Detect if we are running locally (dev) or building for GitHub Pages (production)
+const isDev = process.env.NODE_ENV === 'development';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://www.hjortolars.se', // Your custom domain
-  output: 'static', // Tells Astro to allow the Keystatic dashboard to run
-  integrations: [react(), keystatic()],
+  site: 'https://www.hjortolars.se',
+  output: 'static', 
+  integrations: [
+    react(), 
+    // Only inject Keystatic (and its server routes) during local development
+    ...(isDev ? [keystatic()] : [])
+  ],
 });
